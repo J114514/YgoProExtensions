@@ -232,12 +232,12 @@ function c2020003.initial_effect(c)
 
 
 	local e10=Effect.CreateEffect(c)
-	e10:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_UNCOPYABLE)
+	e10:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DAMAGE_CAL+EFFECT_FLAG_UNCOPYABLE)
 	e10:SetDescription(aux.Stringid(2020003,5))
 	e10:SetCategory(CATEGORY_ATKCHANGE)
 	e10:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_F)
 	e10:SetRange(LOCATION_MZONE)
-	e10:SetCountLimit(50)
+	e10:SetCountLimit(60)
 	e10:SetCode(EVENT_SUMMON_SUCCESS)
 	e10:SetCondition(c2020003.atkcon)
 	e10:SetTarget(c2020003.atktg)
@@ -252,12 +252,12 @@ function c2020003.initial_effect(c)
 	
 	--下降对手怪兽防御、破坏
 	local e13=Effect.CreateEffect(c)
-	e13:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_UNCOPYABLE)
+	e13:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DAMAGE_CAL+EFFECT_FLAG_UNCOPYABLE)
 	e13:SetDescription(aux.Stringid(2020003,6))
 	e13:SetCategory(CATEGORY_DEFCHANGE)
 	e13:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_F)
 	e13:SetRange(LOCATION_MZONE)
-	e13:SetCountLimit(50)
+	e13:SetCountLimit(60)
 	e13:SetCode(EVENT_SUMMON_SUCCESS)
 	e13:SetCondition(c2020003.defcon)
 	e13:SetTarget(c2020003.deftg)
@@ -824,7 +824,7 @@ function c2020003.atkcon(e,tp,eg,ep,ev,re,r,rp)
 end
 
 function c2020003.atktg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chk==0 then return e:GetHandler():IsRelateToEffect(e) end
+	if chk==0 then return true end--e:GetHandler():IsRelateToEffect(e) end
 	Duel.SetTargetCard(eg)
 end
 
@@ -834,22 +834,22 @@ function c2020003.atkop(e,tp,eg,ep,ev,re,r,rp)
 	local dg=Group.CreateGroup()
 	local c=e:GetHandler()
 	if g:GetCount()>0 then
-	local tc=g:GetFirst()
-	while tc do
-		local preatk=tc:GetAttack()
-		if preatk==0 then dg:AddCard(tc) end
-		if preatk>0 then
+		local tc=g:GetFirst()
+		while tc do
+			--local preatk=tc:GetAttack()
 			local e1=Effect.CreateEffect(c)
 			e1:SetType(EFFECT_TYPE_SINGLE)
 			e1:SetCode(EFFECT_UPDATE_ATTACK)
 			e1:SetValue(-2000)
 			e1:SetReset(RESET_EVENT+0x1fe0000)
-			tc:RegisterEffect(e1)
-			if tc:GetAttack()==0 then dg:AddCard(tc) end 
+			tc:RegisterEffect(e1) 
+			if tc:GetAttack()==0 then 
+				dg:AddCard(tc) 
+			end 
+			tc=g:GetNext()
 		end
-		tc=g:GetNext()
+		Duel.Destroy(dg,REASON_EFFECT) 
 	end
-	Duel.Destroy(dg,REASON_EFFECT) end
 end
 -------------------------------------------------------------------------------------------------------------------------------------------
 function c2020003.deffilter(c,e,tp)
@@ -863,7 +863,7 @@ function c2020003.defcon(e,tp,eg,ep,ev,re,r,rp)
 end
 
 function c2020003.deftg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return e:GetHandler():IsRelateToEffect(e) end
+	if chk==0 then return true end
 	Duel.SetTargetCard(eg)
 end
 
@@ -874,21 +874,22 @@ function c2020003.defop(e,tp,eg,ep,ev,re,r,rp)
 	local dg=Group.CreateGroup()
 	local c=e:GetHandler()
 	if g:GetCount()>0 then
-	local tc=g:GetFirst()
-	while tc do
-		local preatk=tc:GetDefense()
-		if preatk==0 then dg:AddCard(tc) end
-			if preatk>0 then
-		local e1=Effect.CreateEffect(c)
-		e1:SetType(EFFECT_TYPE_SINGLE)
-		e1:SetCode(EFFECT_UPDATE_DEFENSE)
-		e1:SetValue(-2000)
-		e1:SetReset(RESET_EVENT+0x1fe0000)
-		tc:RegisterEffect(e1)
-		if tc:GetDefense()==0 then dg:AddCard(tc) end end
-		tc=g:GetNext()
+		local tc=g:GetFirst()
+		while tc do
+		
+			local e1=Effect.CreateEffect(c)
+			e1:SetType(EFFECT_TYPE_SINGLE)
+			e1:SetCode(EFFECT_UPDATE_DEFENSE)
+			e1:SetValue(-2000)
+			e1:SetReset(RESET_EVENT+0x1fe0000)
+			tc:RegisterEffect(e1)
+			if tc:GetDefense()==0 then 
+				dg:AddCard(tc) 
+			end 
+			tc=g:GetNext()
+		end
+		Duel.Destroy(dg,REASON_EFFECT) 
 	end
-	Duel.Destroy(dg,REASON_EFFECT) end
 end
 
 function c2020003.descon(e,tp,eg,ep,ev,re,r,rp)
