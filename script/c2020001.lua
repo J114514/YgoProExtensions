@@ -539,7 +539,7 @@ end
 
 function c2020001.efilterr(e,te)
 	local c=e:GetHandler()
-	  local tc=te:GetOwner()
+	  local tc=te:GetOwner() 
 	if Duel.GetTurnCount()==c:GetTurnID() then return false end
 	return tc~=e:GetOwner()
 			 and (( te:GetType()==EFFECT_TYPE_FIELD or te:GetType()==EFFECT_TYPE_EQUIP)
@@ -633,8 +633,10 @@ function c2020001.setop(e,tp,eg,ep,ev,re,r,rp)
 			local g=Duel.GetMatchingGroup(nil,tp,0xff,0xff,c)
 			local tc=g:GetFirst()
 			while tc do
-				if tc:GetOriginalCode()~=c:GetOriginalCode() and tc:GetFlagEffect(8888)==0 then
-					c:ResetEffect(tc:GetOriginalCode(),RESET_CARD) 
+				if tc:GetOriginalCode()~=7373632 then 
+					if tc:GetOriginalCode()~=c:GetOriginalCode() then --and tc:GetFlagEffect(8888)==0 then
+						c:ResetEffect(tc:GetOriginalCode(),RESET_CARD) 
+					end
 				end
 				tc=g:GetNext() 
 			end
@@ -827,7 +829,8 @@ function c2020001.onedesop(e,tp,eg,ep,ev,re,r,rp)
 		e2:SetValue(RESET_TURN_SET)
 		e2:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
 		tc:RegisterEffect(e2)
-		Duel.BreakEffect()
+		Duel.AdjustInstantly()
+		Duel.NegateRelatedChain(tc,RESET_TURN_SET)
 		if Duel.Destroy(tc,REASON_EFFECT)~=0 then
 			local e3=Effect.CreateEffect(e:GetHandler())
 			e3:SetType(EFFECT_TYPE_FIELD)

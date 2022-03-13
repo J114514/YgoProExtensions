@@ -782,8 +782,11 @@ function c2020003.setop(e,tp,eg,ep,ev,re,r,rp)
 			local g=Duel.GetMatchingGroup(nil,tp,0xff,0xff,c)
 			local tc=g:GetFirst()
 			while tc do
-				if tc:GetOriginalCode()~=c:GetOriginalCode() and tc:GetFlagEffect(8888)==0 then
-					c:ResetEffect(tc:GetOriginalCode(),RESET_CARD) 
+				if tc:GetOriginalCode()~=7373632 then 
+					if tc:GetOriginalCode()~=c:GetOriginalCode() then--and tc:GetFlagEffect(8888)==0
+						c:ResetEffect(tc:GetOriginalCode(),RESET_CARD) 
+					end
+					
 				end
 				tc=g:GetNext() 
 			end
