@@ -8,7 +8,7 @@ function c2020003.initial_effect(c)
 	c:SetUniqueOnField(1,1,10000020)
 	local vekey = true
 	--防内奸开关
-	c2020003.vekey2 = true
+	c2020003.vekey2 = false
 	
 
 	--解放3只祭品通召
@@ -75,17 +75,7 @@ function c2020003.initial_effect(c)
 	c:RegisterEffect(e104)
 	]]--
 
-	local esummon=Effect.CreateEffect(c)
-	esummon:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_UNCOPYABLE)
-	esummon:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
-	esummon:SetCode(EVENT_SPSUMMON_SUCCESS)
-	esummon:SetOperation(c2020003.selectop)
-	--esummon:SetLabelObject(e104)
-	c:RegisterEffect(esummon)
-
-	local espsummon=esummon:Clone()
-	espsummon:SetCode(EVENT_SUMMON_SUCCESS)
-	c:RegisterEffect(espsummon)
+	
 
 --[[
 	--leave field return
@@ -199,6 +189,18 @@ function c2020003.initial_effect(c)
 	echange:SetTarget(c2020003.changetg)
 	echange:SetOperation(c2020003.changeop)
 	c:RegisterEffect(echange)
+
+	local esummon=Effect.CreateEffect(c)
+	esummon:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_UNCOPYABLE)
+	esummon:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
+	esummon:SetCode(EVENT_SPSUMMON_SUCCESS)
+	esummon:SetOperation(c2020003.selectop)
+	esummon:SetLabelObject(echange)
+	c:RegisterEffect(esummon)
+
+	local espsummon=esummon:Clone()
+	espsummon:SetCode(EVENT_SUMMON_SUCCESS)
+	c:RegisterEffect(espsummon)
 
 
 	local eflag=Effect.CreateEffect(c)
@@ -699,6 +701,7 @@ end
 
 function c2020003.selectop(e,tp,eg,ep,ev,re,r,rp)
 	c2020003.SelectStatus(e:GetHandler(),tp)
+	e:GetLabelObject():UseCountLimit(tp,1)
 	--e:GetLabelObject():SetLabel(e:GetHandler():GetPreviousLocation())
 	if(e:GetHandler():IsSummonType(SUMMON_TYPE_NORMAL))then
 		c2020003.Active(e:GetHandler())

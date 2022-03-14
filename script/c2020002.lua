@@ -4,6 +4,10 @@ function c2020002.initial_effect(c)
 	c:SetUniqueOnField(1,1,10000010)
 
 	local vekey = true
+   -- 强制破坏开关：开启后，翼神龙支付1000LP后进行的破坏行动无视抗性
+	c2020002.vekey2 = false
+	-- 祭品限制开关：开启后，翼神龙解放怪兽只能解放本回合没有进行过攻击宣言的怪兽
+	c2020002.vekey3 = true
 
 	--summon with 3 tribute
 	local e1=Effect.CreateEffect(c)
@@ -446,6 +450,9 @@ function c2020002.initial_effect(c)
 	--Debug.Message(c:GetOwner())
 	--c2020002.SetCardOwner(c,c:GetOwner())
 end
+c2020002.vekey2 = false
+c2020002.vekey3 = false
+
 c2020002.CardOwner = {}
 c2020002.SpSummonPass = {}
 c2020002.AttackValue = {}
@@ -860,8 +867,16 @@ function c2020002.destg(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 
 function c2020002.desop(e,tp,eg,ep,ev,re,r,rp)
-	local g=Duel.GetMatchingGroup(nil,tp,0,LOCATION_MZONE,nil)
-	Duel.Destroy(g,REASON_EFFECT+REASON_RULE)
+	local g=Duel.SelectMatchingCard(tp,nil,tp,LOCATION_MZONE,LOCATION_MZONE,0,12,nil)
+	if g:GetCount()>0 then 
+		local res = REASON_EFFECT 
+		if c2020002.vekey2 then 
+			res = res + REASON_RULE 
+		end
+		Duel.HintSelection(g)
+		Duel.Destroy(g,res)
+	end
+   
 end
 function c2020002.eefilter(e,te)
 	return te:GetOwner()~=e:GetOwner()
@@ -964,9 +979,17 @@ function c2020002.tgop(e,c,p,extp)
 	end
 end
 
+function c2020002.otkcost2filter(c)
+	if c2020002.vekey3 then
+		return c:GetAttackAnnouncedCount()<1
+	else
+		return true
+	end
+end
+
 function c2020002.otkcost2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return e:GetHandler():GetFlagEffect(2020012)<=0 and Duel.CheckReleaseGroup(tp,nil,1,e:GetHandler()) end
-	local g=Duel.SelectReleaseGroup(tp,nil,1,99,e:GetHandler())
+	if chk==0 then return e:GetHandler():GetFlagEffect(2020012)<=0 and Duel.CheckReleaseGroup(tp,c2020002.otkcost2filter,1,e:GetHandler()) end
+	local g=Duel.SelectReleaseGroup(tp,c2020002.otkcost2filter,1,99,e:GetHandler())
 	 local tc=g:GetFirst()
 		local tatk=0
 		local tdef=0

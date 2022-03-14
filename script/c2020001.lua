@@ -8,6 +8,8 @@
 function c2020001.initial_effect(c)
 
 	local vekey = true
+	--关闭后，神拳震撼波不再规则破坏
+	c2020001.vekey2 = true
 	
 	c:SetUniqueOnField(1,1,10000000)
 
@@ -183,7 +185,7 @@ function c2020001.initial_effect(c)
 	esummon:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
 	esummon:SetCode(EVENT_SPSUMMON_SUCCESS)
 	esummon:SetOperation(c2020001.selectop)
-	esummon:SetLabelObject(e104)
+	esummon:SetLabelObject(echange)
 	c:RegisterEffect(esummon)
 
 	local espsummon=esummon:Clone()
@@ -234,7 +236,7 @@ function c2020001.initial_effect(c)
 	local e10=Effect.CreateEffect(c)
 	e10:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_CANNOT_INACTIVATE+EFFECT_FLAG_CANNOT_NEGATE+EFFECT_FLAG_UNCOPYABLE)
 	e10:SetDescription(aux.Stringid(2020001,0))
-	e10:SetCategory(CATEGORY_DESTROY+CATEGORY_DAMAGE)
+	e10:SetCategory(CATEGORY_DESTROY)
 	--e10:SetType(EFFECT_TYPE_IGNITION)
 	e10:SetType(EFFECT_TYPE_QUICK_O)
 	e10:SetCode(EVENT_FREE_CHAIN)
@@ -674,7 +676,7 @@ end
 
 function c2020001.selectop(e,tp,eg,ep,ev,re,r,rp)
 	c2020001.SelectStatus(e:GetHandler(),tp)
-	--e:GetLabelObject():SetLabel(e:GetHandler():GetPreviousLocation())
+	 e:GetLabelObject():UseCountLimit(tp,1)
 	if(e:GetHandler():IsSummonType(SUMMON_TYPE_NORMAL))then
 		c2020001.Active(e:GetHandler())
 	end
@@ -720,10 +722,10 @@ function c2020001.descost(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 
 function c2020001.filter(c,atk)
-	return (
+	return ((
 		(c:IsPosition(POS_FACEUP_ATTACK) and c:GetAttack()<atk) 
 		or (c:IsPosition(POS_FACEUP_DEFENSE) and c:GetDefense()<atk) 
-		or c:IsFacedown()
+		or c:IsFacedown())
 	)
 end
 
@@ -747,14 +749,36 @@ function c2020001.desop(e,tp,eg,ep,ev,re,r,rp)
 		local gc = g:GetFirst()
 		while gc do
 			if gc:IsAttackPos() and gc:GetAttack()<c:GetAttack() then
-				sumdamage = sumdamage+(atk-gc:GetAttack())
+				sumdamage = sumdamage+math.abs((atk-gc:GetAttack()))
 			end
 			gc = g:GetNext()
 		end
-		Duel.Destroy(g,REASON_BATTLE)
+		
+		
+		--local tc = g:GetFirst()
+	   if c2020001.vekey2 then
+			Duel.Destroy(g,REASON_BATTLE+REASON_RULE)
+		else
+			Duel.Destroy(g,REASON_BATTLE)
+		end
+--[[
+		while tc do
+			if not tc:IsOnField() then
+				Debug.Message(tc:GetCode().."++++")
+				Debug.Message(tc:GetReason())
+				Debug.Message(tc:GetReasonEffect()==e)
+				Debug.Message(tc:GetReasonEffect():GetHandler():GetCode())
+			end
+			tc = g:GetNext()
+		end
+		]]--
 	end
-	if(Duel.GetTurnPlayer()~=tp and c:IsLocation(LOCATION_MZONE)) then sumdamage = sumdamage+c:GetAttack() end
-	Duel.Damage(1-tp,sumdamage, REASON_BATTLE)
+	if(Duel.GetTurnPlayer()~=tp ) then 
+		sumdamage = sumdamage+c:GetAttack() 
+	end
+	if c:IsOnField() then
+		Duel.Damage(1-tp,sumdamage, REASON_BATTLE)
+	end
 	if(Duel.GetTurnPlayer()==tp and c:IsLocation(LOCATION_MZONE)) then
 		local e1=Effect.CreateEffect(c)
 		e1:SetType(EFFECT_TYPE_SINGLE)
@@ -864,12 +888,14 @@ end
 
 function c2020001.distg(e,c)
 	local tc=e:GetLabelObject()
-	return c:IsCode(tc:GetCode())
+	
+	return c:IsCode(tc:GetCode(),tc:GetOriginalCodeRule()) or c:IsOriginalCodeRule(tc:GetCode(),tc:GetOriginalCodeRule())
 end
 
 function c2020001.discon(e,tp,eg,ep,ev,re,r,rp)
 	local tc=e:GetLabelObject()
-	return re:IsActiveType(TYPE_MONSTER) and re:GetHandler():IsCode(tc:GetCode())
+	local rc = re:GetHandler()
+	return re:IsActiveType(TYPE_MONSTER) and (rc:IsCode(tc:GetCode(),tc:GetOriginalCodeRule()) or rc:IsOriginalCodeRule(tc:GetCode(),tc:GetOriginalCodeRule()))
 end
 function c2020001.disop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.NegateEffect(ev)
@@ -879,12 +905,19 @@ function c2020001.atkop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if c:IsFacedown() or not c:IsRelateToEffect(e) then return end
 	local e1=Effect.CreateEffect(c)
-	e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
-	e1:SetType(EFFECT_TYPE_SINGLE)
+	e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_IGNORE_IMMUNE)
+	e1:SetType(EFFECT_TYPE_FIELD)
+	e1:SetRange(LOCATION_MZONE)
+	e1:SetTargetRange(LOCATION_MZONE,LOCATION_MZONE)
 	e1:SetCode(EFFECT_SET_ATTACK_FINAL)
-	e1:SetValue(88888888)
+	e1:SetValue(c2020001.atkinfval)--88888888
 	e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
 	c:RegisterEffect(e1)
+	local e2=e1:Clone()
+	e2:SetCode(EFFECT_SET_DEFENSE_FINAL)
+	e2:SetValue(c2020001.definfval)--88888888
+	e2:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
+	c:RegisterEffect(e2)
 	  --damage maximize
 	  local e6=Effect.CreateEffect(c)
 	  e6:SetType(EFFECT_TYPE_CONTINUOUS+EFFECT_TYPE_FIELD)
@@ -904,20 +937,53 @@ function c2020001.atkop(e,tp,eg,ep,ev,re,r,rp)
 	--c:RegisterEffect(e5)
 end
 
+function c2020001.isbattleaboutfilter(c,mc)
+	return (Duel.GetAttacker()==mc and Duel.GetAttackTarget()==c) or (Duel.GetAttacker()==c and Duel.GetAttackTarget()==mc) 
+end
+
+function c2020001.atkinfval(e,c)
+	local mc = e:GetHandler()
+	if mc==c then
+	   return 1145141919
+	else
+		if mc:GetAttack()>0 and c2020001.isbattleaboutfilter(c,mc) then
+			if c:GetAttack()>=mc:GetAttack() then
+				return mc:GetAttack()
+			else
+				return 810
+			end
+		end
+		return c:GetAttack()
+	end
+end
+
+function c2020001.definfval(e,c)
+	local mc = e:GetHandler()
+	if c~=mc and  mc:GetAttack()>0 and c2020001.isbattleaboutfilter(c,mc) then
+	   if c:IsDefenseAbove(mc:GetAttack()) then
+		  return mc:GetAttack()
+	   else
+		  return 810
+	   end
+	else
+		return c:GetDefense()
+	end
+end
+
 function c2020001.efilter2(e,te)
 	return te:IsHasCategory(CATEGORY_ATKCHANGE)
 end
 
 function c2020001.rdcon(e,tp,eg,ep,ev,re,r,rp)
 	return (e:GetHandler()==Duel.GetAttackTarget() or e:GetHandler()==Duel.GetAttacker())
-	  and e:GetHandler():GetAttack()>=88888888 and Duel.GetLP(1-e:GetHandler():GetControler())>Duel.GetBattleDamage(1-e:GetHandler():GetControler())
+	  and e:GetHandler():GetAttack()>=114514810 and Duel.GetLP(1-e:GetHandler():GetControler())>Duel.GetBattleDamage(1-e:GetHandler():GetControler())
 end
 function c2020001.rdop(e,tp,eg,ep,ev,re,r,rp)
 	  local c=e:GetHandler()
 	  local X=Duel.GetLP(1-e:GetHandler():GetControler())
 	  local c=e:GetHandler()
 	  local ttp=c:GetControler()
-	  if e:GetHandler():GetAttack()>=88888888 and Duel.GetLP(1-ttp)>Duel.GetBattleDamage(1-ttp) then
+	  if e:GetHandler():GetAttack()>=114514810 and Duel.GetLP(1-ttp)>Duel.GetBattleDamage(1-ttp) then
 	local e3=Effect.CreateEffect(c)
 	e3:SetType(EFFECT_TYPE_FIELD)
 	e3:SetCode(EFFECT_CHANGE_DAMAGE)
