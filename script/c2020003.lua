@@ -498,18 +498,14 @@ function c2020003.ttcon(e,c,minc,a,b)
 	--Debug.Message(minc)
 	
 	local mg = Duel.GetTributeGroup(c)
-	local mc = mg:GetFirst()
-	local tnum = 0
-	while mc do
-		tnum = tnum + c2020003.gettnum(mc)
-		mc = mg:GetNext()
-	end
 	
 	
-	return minc<=3 and tnum>=3--and Duel.CheckTribute(c,3)
+	
+	return minc<=3 and c2020003.checkmg(mg)--and Duel.CheckTribute(c,3)
 end
 
 function c2020003.gettnum(c)
+	
 	if c:GetMaterialCount()>1 then
 		 return math.min(3,c:GetMaterialCount())
 	else
@@ -518,7 +514,14 @@ function c2020003.gettnum(c)
 end
 
 function c2020003.checkmg(g)
-	return g:CheckWithSumEqual(c2020003.gettnum,3,1,3)
+	--return g:CheckWithSumEqual(c2020003.gettnum,3,1,3)
+	local mc = g:GetFirst()
+	local tnum = 0
+	while mc do
+		tnum = tnum + c2020003.gettnum(mc)
+		mc = g:GetNext()
+	end
+	return tnum>=3
 end
 
 function c2020003.ttop(e,tp,eg,ep,ev,re,r,rp,c)
@@ -640,7 +643,7 @@ end
 function c2020003.rediecon(e,tp,eg,ep,ev,re,r,rp)
 	local c = e:GetHandler()
 	local owner = c:GetOwner()
-	return rp==owner and c:IsPreviousLocation(LOCATION_MZONE)
+	return rp==owner and c:IsPreviousLocation(LOCATION_MZONE) and r ~= REASON_EFFECT 
 end
 
 

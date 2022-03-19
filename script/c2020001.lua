@@ -438,15 +438,8 @@ function c2020001.ttcon(e,c,minc)
 	--Debug.Message(minc)
 	
 	local mg = Duel.GetTributeGroup(c)
-	local mc = mg:GetFirst()
-	local tnum = 0
-	while mc do
-		tnum = tnum + c2020001.gettnum(mc)
-		mc = mg:GetNext()
-	end
-	
-	
-	return minc<=3 and tnum>=3--and Duel.CheckTribute(c,3)
+ 
+	return minc<=3 and c2020001.checkmg(mg)
 end
 
 
@@ -459,7 +452,13 @@ function c2020001.gettnum(c)
 end
 
 function c2020001.checkmg(g)
-	return g:CheckWithSumEqual(c2020001.gettnum,3,1,3)
+	local mc = g:GetFirst()
+	local tnum = 0
+	while mc do
+		tnum = tnum + c2020001.gettnum(mc)
+		mc = g:GetNext()
+	end
+	return tnum>=3
 end
 
 
@@ -467,7 +466,6 @@ function c2020001.ttop(e,tp,eg,ep,ev,re,r,rp,c)
 	--local g=Duel.SelectTribute(tp,c,3,3)
 	local mg = Duel.GetTributeGroup(c)
 	local g = mg:SelectSubGroup(tp,c2020001.checkmg,false,1,3)
-	
 	c:SetMaterial(g)
 	Duel.Release(g,REASON_SUMMON+REASON_MATERIAL)
 end
@@ -750,6 +748,7 @@ function c2020001.desop(e,tp,eg,ep,ev,re,r,rp)
 		while gc do
 			if gc:IsAttackPos() and gc:GetAttack()<c:GetAttack() then
 				sumdamage = sumdamage+math.abs((atk-gc:GetAttack()))
+			
 			end
 			gc = g:GetNext()
 		end
@@ -1057,7 +1056,8 @@ function c2020001.tgop(e,c,p,extp)
 	if not p then
 		p = c:GetOwner()
 	end
-	local tgzone = c:GetPreviousLocation();
+	local tgzone = c:GetPreviousLocation()
+	
 	if extp~=nil then tgzone = extp end
 	
 	if c:IsFaceup() then
@@ -1250,7 +1250,7 @@ end
 function c2020001.rediecon(e,tp,eg,ep,ev,re,r,rp)
 	local c = e:GetHandler()
 	local owner = c:GetOwner()
-	return rp==owner and c:IsPreviousLocation(LOCATION_MZONE)
+	return rp==owner and c:IsPreviousLocation(LOCATION_MZONE) and r ~= REASON_EFFECT 
 end
 
 function c2020001.bdiecon(e,tp,eg,ep,ev,re,r,rp)

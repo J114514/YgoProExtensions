@@ -554,15 +554,9 @@ end
 function c2020002.ttcon1(e,c,minc)
 	if c==nil then return true end
 	local mg = Duel.GetTributeGroup(c)
-	local mc = mg:GetFirst()
-	local tnum = 0
-	while mc do
-		tnum = tnum + c2020002.gettnum(mc)
-		mc = mg:GetNext()
-	end
 	
 	
-	return minc<=3 and tnum>=3--and Duel.CheckTribute(c,3)
+	return minc<=3 and c2020002.checkmg(mg)--and Duel.CheckTribute(c,3)
 end
 
 
@@ -575,7 +569,14 @@ function c2020002.gettnum(c)
 end
 
 function c2020002.checkmg(g)
-	return g:CheckWithSumEqual(c2020002.gettnum,3,1,3)
+	--return g:CheckWithSumEqual(c2020002.gettnum,3,1,3)
+	local mc = g:GetFirst()
+	local tnum = 0
+	while mc do
+		tnum = tnum + c2020002.gettnum(mc)
+		mc = g:GetNext()
+	end
+	return tnum>=3
 end
 
 
@@ -1389,7 +1390,7 @@ end
 function c2020002.bdiecon(e,tp,eg,ep,ev,re,r,rp)
 	local c = e:GetHandler()
 	local owner = c2020002.GetCardOwner(c)
-	return rp==1-owner and Duel.GetAttacker() and c:IsPreviousLocation(LOCATION_MZONE)
+	return rp==1-owner and Duel.GetAttacker() and c:IsPreviousLocation(LOCATION_MZONE) and r ~= REASON_EFFECT 
 end
 
 
