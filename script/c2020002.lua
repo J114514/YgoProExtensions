@@ -7,7 +7,7 @@ function c2020002.initial_effect(c)
    -- 强制破坏开关：开启后，翼神龙支付1000LP后进行的破坏行动无视抗性
 	c2020002.vekey2 = false
 	-- 祭品限制开关：开启后，翼神龙解放怪兽只能解放本回合没有进行过攻击宣言的怪兽
-	c2020002.vekey3 = true
+	c2020002.vekey3 = false
 
 	--summon with 3 tribute
 	local e1=Effect.CreateEffect(c)
@@ -102,7 +102,7 @@ function c2020002.initial_effect(c)
 	e83:SetDescription(aux.Stringid(2020002,8))
 	e83:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
 	e83:SetRange(0xff)
-	e83:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE+EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_UNCOPYABLE)
+	e83:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE+EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_UNCOPYABLE+EFFECT_FLAG_DELAY)
 	e83:SetCountLimit(1)
 	e83:SetLabelObject(c)
 	e83:SetCode(EVENT_PHASE+PHASE_END)
@@ -445,6 +445,22 @@ function c2020002.initial_effect(c)
 	ve2:SetTarget(c2020002.pytg)
 	ve2:SetOperation(c2020002.pyop)
 	c:RegisterEffect(ve2)
+
+	--visiable
+	local ve3=Effect.CreateEffect(c)
+	ve3:SetDescription(aux.Stringid(2020001,12))
+	ve3:SetType(EFFECT_TYPE_IGNITION+EFFECT_TYPE_CONTINUOUS)
+	ve3:SetRange(LOCATION_MZONE)
+	--ve3:SetCategory(CATEGORY_DRAW)
+	ve3:SetLabelObject(c)
+	ve3:SetProperty(EFFECT_FLAG_BOTH_SIDE+EFFECT_FLAG_SET_AVAILABLE+EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_CANNOT_INACTIVATE+EFFECT_FLAG_CANNOT_NEGATE+EFFECT_FLAG_UNCOPYABLE)
+	ve3:SetCondition(c2020002.mecon2)
+	ve3:SetOperation(c2020002.removemeop)
+	c:RegisterEffect(ve3)
+	local ve03 = ve3:Clone()
+	ve03:SetType(EFFECT_TYPE_XMATERIAL+EFFECT_TYPE_IGNITION+EFFECT_TYPE_CONTINUOUS)
+	ve03:SetRange(LOCATION_MZONE)
+	c:RegisterEffect(ve03)
 
 	end
 	--Debug.Message(c:GetOwner())
@@ -1473,7 +1489,15 @@ function c2020002.pyop(e,tp,eg,ep,ev,re,r,rp)
 end
 
 
+function c2020002.mecon2(e,tp)
+	local c = e:GetLabelObject()
+	return c2020002.IsRealSummon(c) and tp == c:GetOwner() and (not c:IsLocation(LOCATION_MZONE) or c:GetFlagEffect(2020012)<=0)
+end
 
+function c2020002.removemeop(e,tp,eg,ep,ev,re,r,rp)
+	local c = e:GetLabelObject()
+	Duel.Remove(c,POS_FACEUP,REASON_RULE)
+end
 
 
 

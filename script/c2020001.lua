@@ -92,8 +92,8 @@ function c2020001.initial_effect(c)
 
 ----Can only be killed in battle,This Effect is used to Confirm its death
 	local e8=Effect.CreateEffect(c)
-	e8:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
-	e8:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS+EFFECT_FLAG_UNCOPYABLE+EFFECT_FLAG_SET_AVAILABLE)
+	e8:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_UNCOPYABLE+EFFECT_FLAG_SET_AVAILABLE)
+	e8:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
 	e8:SetCode(EVENT_BATTLE_DESTROYED)
 	e8:SetRange(LOCATION_MZONE)
 	e8:SetCondition(c2020001.bdiecon)
@@ -146,7 +146,7 @@ function c2020001.initial_effect(c)
 	e83:SetDescription(aux.Stringid(2020001,3))
 	e83:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
 	e83:SetRange(0xff)
-	e83:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE+EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_UNCOPYABLE)
+	e83:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE+EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_UNCOPYABLE+EFFECT_FLAG_DELAY)
 	e83:SetCountLimit(1)
 	e83:SetLabelObject(c)
 	e83:SetCode(EVENT_PHASE+PHASE_END)
@@ -340,6 +340,7 @@ function c2020001.initial_effect(c)
 	e15:SetValue(c2020001.notfilter)
 	c:RegisterEffect(e15)
 
+
 	if vekey then
 
 	local h2=Effect.CreateEffect(c)
@@ -356,6 +357,8 @@ function c2020001.initial_effect(c)
 	xh2:SetType(EFFECT_TYPE_XMATERIAL+EFFECT_TYPE_IGNITION+EFFECT_TYPE_CONTINUOUS)
 	xh2:SetRange(LOCATION_MZONE)
 	c:RegisterEffect(xh2)
+
+	
 
 	--negate
 	local ve1=Effect.CreateEffect(c)
@@ -385,6 +388,21 @@ function c2020001.initial_effect(c)
 	ve2:SetTarget(c2020001.pytg)
 	ve2:SetOperation(c2020001.pyop)
 	c:RegisterEffect(ve2)
+	--visiable
+	local ve3=Effect.CreateEffect(c)
+	ve3:SetDescription(aux.Stringid(2020001,12))
+	ve3:SetType(EFFECT_TYPE_IGNITION+EFFECT_TYPE_CONTINUOUS)
+	ve3:SetRange(LOCATION_MZONE)
+	--ve3:SetCategory(CATEGORY_DRAW)
+	ve3:SetLabelObject(c)
+	ve3:SetProperty(EFFECT_FLAG_BOTH_SIDE+EFFECT_FLAG_SET_AVAILABLE+EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_CANNOT_INACTIVATE+EFFECT_FLAG_CANNOT_NEGATE+EFFECT_FLAG_UNCOPYABLE)
+	ve3:SetCondition(c2020001.mecon2)
+	ve3:SetOperation(c2020001.removemeop)
+	c:RegisterEffect(ve3)
+	local ve03 = ve3:Clone()
+	ve03:SetType(EFFECT_TYPE_XMATERIAL+EFFECT_TYPE_IGNITION+EFFECT_TYPE_CONTINUOUS)
+	ve03:SetRange(LOCATION_MZONE)
+	c:RegisterEffect(ve03)
 
 	end
 	
@@ -1111,7 +1129,10 @@ function c2020001.mecon(e,tp)
 	local c = e:GetLabelObject()
 	return tp == c:GetOwner()
 end
-
+function c2020001.mecon2(e,tp)
+	local c = e:GetLabelObject()
+	return c2020001.IsRealSummon(c) and tp == c:GetOwner()
+end
 
 function c2020001.grop2(e,tp,eg,ep,ev,re,r,rp)
 	local c = e:GetLabelObject()
@@ -1122,6 +1143,12 @@ function c2020001.grop2(e,tp,eg,ep,ev,re,r,rp)
 	if c2020001.IsRealSummon(c) then
 		c2020001.Die(c)
 	end
+end
+
+
+function c2020001.removemeop(e,tp,eg,ep,ev,re,r,rp)
+	local c = e:GetLabelObject()
+	Duel.Remove(c,POS_FACEUP,REASON_RULE)
 end
 
 function c2020001.protectcon(e)

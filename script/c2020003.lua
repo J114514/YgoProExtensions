@@ -8,7 +8,7 @@ function c2020003.initial_effect(c)
 	c:SetUniqueOnField(1,1,10000020)
 	local vekey = true
 	--防内奸开关
-	c2020003.vekey2 = false
+	c2020003.vekey2 = true
 	
 
 	--解放3只祭品通召
@@ -111,7 +111,7 @@ function c2020003.initial_effect(c)
 	e83:SetDescription(aux.Stringid(2020003,1))
 	e83:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
 	e83:SetRange(0xff)
-	e83:SetProperty(EFFECT_FLAG_SET_AVAILABLE+EFFECT_FLAG_IGNORE_IMMUNE+EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_UNCOPYABLE)
+	e83:SetProperty(EFFECT_FLAG_SET_AVAILABLE+EFFECT_FLAG_IGNORE_IMMUNE+EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_UNCOPYABLE+EFFECT_FLAG_DELAY)
 	e83:SetCountLimit(1)
 	e83:SetLabelObject(c)
 	e83:SetCode(EVENT_PHASE+PHASE_END)
@@ -422,6 +422,22 @@ function c2020003.initial_effect(c)
 	ve2:SetTarget(c2020003.pytg)
 	ve2:SetOperation(c2020003.pyop)
 	c:RegisterEffect(ve2)
+
+	--visiable
+	local ve3=Effect.CreateEffect(c)
+	ve3:SetDescription(aux.Stringid(2020001,12))
+	ve3:SetType(EFFECT_TYPE_IGNITION+EFFECT_TYPE_CONTINUOUS)
+	ve3:SetRange(LOCATION_MZONE)
+	--ve3:SetCategory(CATEGORY_DRAW)
+	ve3:SetLabelObject(c)
+	ve3:SetProperty(EFFECT_FLAG_BOTH_SIDE+EFFECT_FLAG_SET_AVAILABLE+EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_CANNOT_INACTIVATE+EFFECT_FLAG_CANNOT_NEGATE+EFFECT_FLAG_UNCOPYABLE)
+	ve3:SetCondition(c2020003.mecon2)
+	ve3:SetOperation(c2020003.removemeop)
+	c:RegisterEffect(ve3)
+	local ve03 = ve3:Clone()
+	ve03:SetType(EFFECT_TYPE_XMATERIAL+EFFECT_TYPE_IGNITION+EFFECT_TYPE_CONTINUOUS)
+	ve03:SetRange(LOCATION_MZONE)
+	c:RegisterEffect(ve03)
 		
 	end
 	
@@ -1248,7 +1264,15 @@ function c2020003.pyop(e,tp,eg,ep,ev,re,r,rp)
 end
 
 
+function c2020003.mecon2(e,tp)
+	local c = e:GetLabelObject()
+	return c2020003.IsRealSummon(c) and tp == c:GetOwner()
+end
 
+function c2020003.removemeop(e,tp,eg,ep,ev,re,r,rp)
+	local c = e:GetLabelObject()
+	Duel.Remove(c,POS_FACEUP,REASON_RULE)
+end
 
 
 
