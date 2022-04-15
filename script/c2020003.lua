@@ -1142,7 +1142,7 @@ end
 function c2020003.vdcon(e,tp,eg,ep,ev,re,r,rp)
 	local omnum = Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)
 	local emnum = Duel.GetFieldGroupCount(1-tp,LOCATION_ONFIELD,0)
-	return (omnum<=1 or omnum<emnum)
+	return (Duel.GetTurnPlayer()==tp or omnum<emnum)
 		and ep~=tp and Duel.IsChainDisablable(ev)
 end
 
@@ -1229,7 +1229,7 @@ end
 function c2020003.vdcon2(e,tp,eg,ep,ev,re,r,rp)
 	local omnum = Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)
 	local emnum = Duel.GetFieldGroupCount(1-tp,LOCATION_ONFIELD,0)
-	return (omnum<=1 or omnum<emnum)
+	return (Duel.GetTurnPlayer()==tp or omnum<emnum)
 end
 
 function c2020003.fudisfilter(c)

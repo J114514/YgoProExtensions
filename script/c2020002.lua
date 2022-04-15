@@ -883,6 +883,10 @@ function c2020002.destg(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,g:GetCount(),0,0)
 end
 
+function c2020002.efilter(e,te)
+	return e:GetOwner()~=te:GetOwner()
+end
+
 function c2020002.desop(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.SelectMatchingCard(tp,nil,tp,LOCATION_MZONE,LOCATION_MZONE,0,12,nil)
 	if g:GetCount()>0 then 
@@ -1377,7 +1381,7 @@ end
 function c2020002.vdcon(e,tp,eg,ep,ev,re,r,rp)
 	local omnum = Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)
 	local emnum = Duel.GetFieldGroupCount(1-tp,LOCATION_ONFIELD,0)
-	return (omnum<=1 or omnum<emnum)
+	return (Duel.GetTurnPlayer()==tp or omnum<emnum)
 		and ep~=tp and Duel.IsChainDisablable(ev)
 end
 
@@ -1454,7 +1458,7 @@ end
 function c2020002.vdcon2(e,tp,eg,ep,ev,re,r,rp)
 	local omnum = Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)
 	local emnum = Duel.GetFieldGroupCount(1-tp,LOCATION_ONFIELD,0)
-	return (omnum<=1 or omnum<emnum)
+	return (Duel.GetTurnPlayer()==tp or omnum<emnum)
 end
 
 function c2020002.fudisfilter(c)
